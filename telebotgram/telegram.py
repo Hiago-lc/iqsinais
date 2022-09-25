@@ -1,10 +1,6 @@
 import os
 import requests
 import json
-from src.data.driveBot import driveBot
-from src.data.transform_dataframe import transform_data
-from src.visualization.visualize import barv_npsmean_by, hist_nps
-from PIL import Image
 
 CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
 
@@ -12,9 +8,8 @@ bot = telebot.TeleBot(CHAVE_API)
 
 class TelegramBot():
     def __init__(self):
-        TOKEN = os.getenv("API_KEY")
-        self.url = f"https://api.telegram.org/bot{TOKEN}/"
-        self.driveBot = driveBot()
+        TOKEN = os.getenv("CHAVE_API")
+        self.url = f"https://api.telegram.org/bot{TOKEN}/
 
     def start(self):
         print("Inicializando bot...")
@@ -41,7 +36,6 @@ class TelegramBot():
         return json.loads(result.content)
     
     def create_answer(self, message_text):
-        dataframe = transform_data(self.driveBot.get_data())
         message_text = message_text.lower()
         if message_text in ["/start", "ola", "eae", "menu", "oi", "oie"]:
             return "Ola, tudo bem? Seja bem vindo ao Bot do RH da Empresa RDS. Selecione o que deseja:" + "\n" + "1 - NPS interno mensal médio por setor" + "\n" + "2 - NPS interno mensal médio por contratação" + "\n" + "3 - Distribuição do NPS interno" + "\n", 0
