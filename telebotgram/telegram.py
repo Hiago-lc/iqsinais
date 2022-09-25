@@ -7,10 +7,6 @@ CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
 bot = telebot.TeleBot(CHAVE_API)
 
 class TelegramBot():
-    def __init__(self):
-        TOKEN = os.getenv("CHAVE_API")
-        self.url = f"https://api.telegram.org/bot{TOKEN}/
-
     def start(self):
         print("Inicializando bot...")
         update_id = None
