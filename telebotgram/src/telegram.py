@@ -4,7 +4,6 @@ from re import M
 from socket import NI_NUMERICHOST
 from turtle import update
 from typing import Text
-from typing_extensions import Self
 import telebot
 
 CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
@@ -13,8 +12,6 @@ bot = telebot.TeleBot(CHAVE_API)
 
 @bot.message_handler(commands= ["sim"]) ## Agendar Sinal
 def sim(mensagem):
-    update = self.get_message()
-    messages = update['result']
     bot.reply_to(mensagem, "Agendado.")
 
     
@@ -122,9 +119,7 @@ def S3(mensagem):
     /R80
     /R90
     /R100
-
     R = Reais
-
     Atenção! Se não for inscrito, não irá ser agendado.
     """)
 
