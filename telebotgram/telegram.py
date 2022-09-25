@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import telebot
 
 CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
 
