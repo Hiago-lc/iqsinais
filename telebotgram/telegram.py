@@ -1,142 +1,68 @@
-
-import telebot
+import os
+import requests
+import json
+from src.data.driveBot import driveBot
+from src.data.transform_dataframe import transform_data
+from src.visualization.visualize import barv_npsmean_by, hist_nps
+from PIL import Image
 
 CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
 
 bot = telebot.TeleBot(CHAVE_API)
 
-@bot.message_handler(commands= ["sim"]) ## Agendar Sinal
-def sim(mensagem):
-    bot.reply_to(mensagem, "Agendado.")
+class TelegramBot():
+    def __init__(self):
+        TOKEN = os.getenv("API_KEY")
+        self.url = f"https://api.telegram.org/bot{TOKEN}/"
+        self.driveBot = driveBot()
 
+    def start(self):
+        print("Inicializando bot...")
+        update_id = None
+        while True:
+            update = self.get_message(update_id)
+            messages = update['result']
+            if messages:
+                for message in messages:
+                    try:
+                        update_id = message['update_id']
+                        chat_id = message['message']['from']['id']
+                        message_text = message['message']['text']
+                        answer_bot, figure_boolean = self.create_answer(message_text)
+                        self.send_answer(chat_id, answer_bot, figure_boolean)
+                    except:
+                        pass
+
+    def get_message(self, update_id):
+        link_request = f"{self.url}getUpdates?timeout=1000"
+        if update_id:
+            link_request = f"{self.url}getUpdates?timeout=1000&offset={update_id + 1}"
+        result = requests.get(link_request)
+        return json.loads(result.content)
     
-@bot.message_handler(commands= ["R10"]) ## Agendar Sinal
-def R10(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem, """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R20"]) ## Agendar Sinal
-def R20(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem, """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R30"]) ## Agendar Sinal
-def R30(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R40"]) ## Agendar Sinal
-def R40(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R50"]) ## Agendar Sinal
-def R50(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R60"]) ## Agendar Sinal
-def R60(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R70"]) ## Agendar Sinal
-def R70(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R80"]) ## Agendar Sinal
-def R80(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R90"]) ## Agendar Sinal
-def R90(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-@bot.message_handler(commands= ["R100"]) ## Agendar Sinal
-def R100(mensagem):
-    print(mensagem)
-    bot.reply_to(mensagem,  """Confirmar agendamento:
-    /sim
-    /nao
-    """)
-
-
-
-@bot.message_handler(commands=["S1"]) ## Inscrição Grupo Free
-def S1(mensagem):
-    bot.reply_to(mensagem, "Acesse o link e faça sua inscrição:")
-
-@bot.message_handler(commands=["S2"]) ## Inscrição Grupo Vip
-def S2(mensagem):
-    bot.reply_to(mensagem, "Acesse o link e faça sua inscrição:")
-
-@bot.message_handler(commands=["S3"]) ## Agendar Sinal
-def S3(mensagem):
-    bot.reply_to(mensagem, """
-    Quantia de entrada:
-    /R10
-    /R20
-    /R30
-    /R40
-    /R50
-    /R60
-    /R70
-    /R80
-    /R90
-    /R100
-    R = Reais
-    Atenção! Se não for inscrito, não irá ser agendado.
-    """)
-
-
-
-
-
-def verificar(mensagem):
-	return True
-
-
-@bot.message_handler(func=verificar)
-def responder(mensagem):
-    texto = """
-    Olá, seja bem-vindo ao Sinais IQOption.
+    def create_answer(self, message_text):
+        dataframe = transform_data(self.driveBot.get_data())
+        message_text = message_text.lower()
+        if message_text in ["/start", "ola", "eae", "menu", "oi", "oie"]:
+            return "Ola, tudo bem? Seja bem vindo ao Bot do RH da Empresa RDS. Selecione o que deseja:" + "\n" + "1 - NPS interno mensal médio por setor" + "\n" + "2 - NPS interno mensal médio por contratação" + "\n" + "3 - Distribuição do NPS interno" + "\n", 0
+        elif message_text == '1':
+            return barv_npsmean_by(dataframe, "Setor"), 1
+        elif message_text == '2':
+            return barv_npsmean_by(dataframe, "Tipo de Contratação"), 1
+        elif message_text == '3':
+            return hist_nps(dataframe), 1
+        else:
+            return "Comando não encontrado, tente novamente. Selecione o que deseja:" + "\n" + "1 - NPS interno mensal médio por setor" + "\n" + "2 - NPS interno mensal médio por contratação" + "\n" + "3- Distribuição do NPS interno" + "\n", 0
     
-    Clique e escolha uma de nossas opções:
-    /S1 - Inscrição Grupo Free
-    /S2 - Inscrição Grupo Vip
-    /S3 - Agendar Sinal"""
-    bot.reply_to(mensagem, texto)
+    def send_answer(self, chat_id, answer, figure_boolean):
+        if figure_boolean == 0:
+            link_to_send = f"{self.url}sendMessage?chat_id={chat_id}&text={answer}"
+            requests.get(link_to_send)
+            return
+        else:
+            answer.seek(0)
+            requests.post(f"{self.url}sendPhoto?chat_id={chat_id}", files = dict(photo=answer))
+            answer.close()
+            return
 
 
-
-bot.polling()
