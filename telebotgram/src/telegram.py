@@ -1,9 +1,4 @@
-from cgitb import text
-import numbers
-from re import M
-from socket import NI_NUMERICHOST
-from turtle import update
-from typing import Text
+
 import telebot
 
 CHAVE_API = "5668253553:AAFk8c8x9KjxrCJTBX_x-JM9jK_gjWe3_MM"
